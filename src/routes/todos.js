@@ -1,3 +1,4 @@
+/* eslint-disable babel/new-cap */
 import express from 'express'
 
 import todoController from '../controllers/todo'
@@ -16,9 +17,9 @@ todoRouter.route('/view/:id')
 todoRouter.route('/new')
   .post(permissions.isAuthenticated, validation.newTodo, todoController.postNewTodo)
 todoRouter.route('/edit/:id')
-  .put(validation.editTodo, permissions.isAuthenticated, todoController.putEditTodo) 
+  .put(validation.editTodo, permissions.isAuthenticated, todoController.putEditTodo)
 todoRouter.route('/delete/:id')
-  .delete(permissions.isAuthenticated, todoController.deleteTodo) 
+  .delete(permissions.isAuthenticated, todoController.deleteTodo)
 
 
 export default todoRouter

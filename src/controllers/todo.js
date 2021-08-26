@@ -1,30 +1,30 @@
 import {validationResult} from 'express-validator'
 import db from '../../db/models'
-import { convertDate } from '../helpers/date-converter'
+import {convertDate} from '../helpers/date-converter'
 import {Op} from 'sequelize'
 
 
- const todoController  = {
-  
+const todoController  = {
+
   getAllUserTodos: (req, res) => {
     db.Todo.findAll({
-      where: { user_id: req.decoded.id },
+      where: {user_id: req.decoded.id},
       order: [['dueDate', 'DESC']]
     })
-    .then(todos => {
+      .then(todos => {
       // Filter option for all unique date
-      const dateOptions = []
-      todos.forEach(todo => {
+        const dateOptions = []
+        todos.forEach(todo => {
         // convert date
-        const convertedDate = convertDate(todo.dataValues.dueDate)
-        // Add unique date to date filter
-        if (!dateOptions.includes(convertedDate)) { dateOptions.push(convertedDate) }
-        // convert all displayed date
-        todo.dataValues.dueDate = convertedDate
+          const convertedDate = convertDate(todo.dataValues.dueDate)
+          // Add unique date to date filter
+          if (!dateOptions.includes(convertedDate))  dateOptions.push(convertedDate)
+          // convert all displayed date
+          todo.dataValues.dueDate = convertedDate
+        })
+        return res.status(200).send({success: true, todos})
       })
-      return res.status(200).send({success: true, todos})
-    })
-    .catch(error => res.status(422).send({message: 'unable to process your request'}))
+      .catch(error => res.status(422).send({message: 'unable to process your request'}))
   },
 
   getViewOneTodo: (req, res) => {
@@ -53,23 +53,23 @@ import {Op} from 'sequelize'
     const status = selectedStatus === 'Done' ? true
       : selectedStatus === 'Undone' ? false
         : ''
-    const dueDate = selectedDueDate ? { [Op.eq]: new Date(selectedDueDate) } : { [Op.gte]: new Date('2019-01-01') }
+    const dueDate = selectedDueDate ? {[Op.eq]: new Date(selectedDueDate)} : {[Op.gte]: new Date('2019-01-01')}
 
     // Filter option for all unique date
     const dateOptions = []
 
     db.Todo.findAll({
       attributes: ['dueDate'],
-      where: { user_id: req.decoded.id },
+      where: {user_id: req.decoded.id},
       group: ['dueDate'],
       order: [['dueDate', 'DESC']]
-      })
+    })
       .then(allDate => {
         allDate.forEach(date => dateOptions.push(convertDate(date.dataValues.dueDate)))
         return db.Todo.findAll({
           where: {
             user_id: req.decoded.id,
-            done: { [Op.or]: [status][0] === '' ? [true, false] : [status] },
+            done: {[Op.or]: [status][0] === '' ? [true, false] : [status]},
             dueDate
           },
           order: [[sort, 'DESC']]
@@ -84,18 +84,17 @@ import {Op} from 'sequelize'
   },
   postNewTodo: (req, res) => {
     // keep user input
-    const { name, status, detail, dueDate } = req.body
+    const {name, detail, dueDate} = req.body
     // retrieve error message from express-validator
     const errors = validationResult(req)
     // one or more error messages exist
     if (!errors.isEmpty()) {
       const extractedErrors = []
-      errors.array().map(err => extractedErrors.push({ [err.param]: err.msg }))
+      errors.array().map(err => extractedErrors.push({[err.param]: err.msg}))
       return res.status(422).send({
         message: extractedErrors
       })
     }
-    console.log(req.decoded)
     // pass validation
     db.Todo.create({
       name,
@@ -104,24 +103,19 @@ import {Op} from 'sequelize'
       user_id: req.decoded.id,
       dueDate
     })
-      .then(todo => {
-          return res.status(201).send({message: "Todo successfully created", todo})
-        })
-      .catch(error => {
-          console.log(WHY)
-          return res.status(422).send({message: error.message})
-        })
+      .then(todo => res.status(201).send({message: 'Todo successfully created', todo}))
+      .catch(error => res.status(422).send({message: error.message}))
   },
 
   putEditTodo: (req, res) => {
     // keep user input
-    const { id, name, status, detail, dueDate } = req.body
+    const {name, detail, dueDate} = req.body
     // retrieve error message from express-validator
     const errors = validationResult(req)
     // one or more error messages exist
     if (!errors.isEmpty()) {
       const extractedErrors = []
-      errors.array().map(err => extractedErrors.push({ [err.param]: err.msg }))
+      errors.array().map(err => extractedErrors.push({[err.param]: err.msg}))
       return res.status(422).send({
         message: extractedErrors
       })
@@ -140,7 +134,7 @@ import {Op} from 'sequelize'
         todo.dueDate = dueDate
         return todo.save()
       })
-      .then(todo => res.status(201).send({message: "Todo successfully updated", todo}))
+      .then(todo => res.status(201).send({message: 'Todo successfully updated', todo}))
       .catch(error => res.status(422).send({message: 'unable to process your request'}))
   },
   deleteTodo: (req, res) => {
@@ -150,7 +144,7 @@ import {Op} from 'sequelize'
         id: req.params.id
       }
     })
-      .then(todo => res.status(202).send({message: "Successfuly deleted"}))
+      .then(todo => res.status(202).send({message: 'Successfuly deleted'}))
       .catch(error => res.status(422).send({message: 'unable to process your request'}))
   }
 }

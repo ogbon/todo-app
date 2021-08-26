@@ -9,10 +9,10 @@ const permissions = {
         req.decoded = user
         next()
       } else {
-          res.status(statusCodes.UNAUTHORIZED).send({message: 'Please login to your account.'})
+        res.status(statusCodes.UNAUTHORIZED).send({message: 'Please login to your account.'})
       }
     } catch (error) {
-        res.status(statusCodes.UNAUTHORIZED).send({message: 'Please login to your account.'})
+      res.status(statusCodes.UNAUTHORIZED).send({message: 'Please login to your account.'})
     }
   }
 }
